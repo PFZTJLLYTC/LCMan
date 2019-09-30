@@ -134,50 +134,13 @@
     function fnCheckLogin(){
       var userInfo=$api.getStorage('userInfo');
       console.log(JSON.stringify(userInfo));
+      if(userInfo!=null){
+        api.openWin({
+            name: 'index',
+            url: '../index.html',
+            slidBackEnabled:false
+        });
 
-      if(userInfo){
-        api.ajax({
-            url: 'http://'+url+':'+port+'/manager/checkLogin',
-            method: 'get',
-            headers: {
-                 'Content-Type': 'application/json;charset=utf-8'
-            },
-            data:{
-              values:{
-                username:userInfo.username,
-              }
-            }
-        }, function(ret, err) {
-
-          if(ret!=null){
-            console.log(JSON.stringify(ret));
-            if (ret.code==0) {
-                // 保存用户信息
-                console.log(JSON.stringify(ret.data));
-                $api.setStorage('userInfo', ret.data);
-
-                api.openWin({
-                    name: 'index',
-                    url: '../index.html',
-                    slidBackEnabled:false
-                });
-            } else {
-                api.toast({
-                    msg: ret.msg,
-                    duration: 2000,
-                    location: 'middle'
-                });
-            }
-          }else{
-            console.log(JSON.stringify(err));
-            api.toast({
-                msg: '网络异常',
-                duration: 2000,
-                location: 'middle'
-            });
-          }
-
-          });
       }
     }
 
@@ -298,14 +261,14 @@
 
 
         api.ajax({
-            url: 'http://'+url+':'+port+'/manager/login',
+            url: 'http://'+url+':'+port+'/mobileManager/login',
             method: 'post',
             headers: {
                  'Content-Type': 'application/json;charset=utf-8'
             },
             data:{
               body:{
-                "username":usernameValue,
+                "mobile":usernameValue,
                 "password":passwordValue
               }
             }

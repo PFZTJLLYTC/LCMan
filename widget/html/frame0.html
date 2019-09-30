@@ -18,138 +18,199 @@
 <script type="text/javascript">
 
 apiready = function() {
+
     fnInitUIListView();
 };
 
 var UIListView;
+var dialogBox;
 
 function fnInitUIListView(){
 
-var UIListMeeting = api.require('UIListMeeting');
-UIListMeeting.open({
+  UIListView= api.require('UIListView');
+
+  UIListView.open({
     rect: {
-        x: 10,
-        y: 20,
-        w: api.winWidth-20,
-        h: api.frameHeight-170
+        x: 0,
+        y: 0,
+        w: api.winWidth,
+        h: api.frameHeight
     },
     data: [{
         uid: '1001',
-        head: '华',
-        headBg: '#ff0000',
-        name: '德华',
-        title: '歌手',
-        status: 'fs://meeting/ring0.png',
-        mark: 'fs://meeting/record0.png'
+        imgPath: 'fs://../wgt/A6014137855572/image/processin.png',
+        title: '进行中',
+        subTitle: '子标题，说明文字',
+        remark: '',
+        icon: ''
     }, {
-        uid: '1002',
-        head: '友',
-        headBg: '#ff34b3',
-        name: '学友',
-        title: '歌手',
-        status: 'fs://meeting/ring1.png',
-        mark: 'fs://meeting/record1.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/processin.png',
+        title: '进行中',
+        subTitle: '子标题，说明文字',
+        remark: '',
+        icon: ''
     }, {
-        uid: '1003',
-        head: '黎',
-        headBg: '#ffd700',
-        name: '黎明',
-        title: '歌手',
-        status: 'fs://meeting/ring2.png',
-        mark: 'fs://meeting/record2.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }, {
-        uid: '1004',
-        head: '成',
-        headBg: '#fa8072',
-        name: '富成',
-        title: '歌手',
-        status: 'fs://meeting/ring3.png',
-        mark: 'fs://meeting/record3.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }, {
-        uid: '1005',
-        head: '含',
-        headBg: '#ff00ff',
-        name: '韩寒',
-        title: '粉丝',
-        status: 'fs://meeting/ring0.png',
-        mark: 'fs://meeting/record0.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }, {
-        uid: '1006',
-        head: '郭',
-        headBg: '#cdcd00',
-        name: '敬明',
-        title: '粉丝',
-        status: 'fs://meeting/ring2.png',
-        mark: 'fs://meeting/record2.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }, {
-        uid: '1007',
-        head: '布',
-        headBg: '#a2b5cd',
-        name: '布什',
-        title: '屌丝',
-        status: 'fs://meeting/ring1.png',
-        mark: 'fs://meeting/record1.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }, {
-        uid: '1008',
-        head: '森',
-        headBg: '#b8860b',
-        name: '小森',
-        title: '屌丝',
-        status: 'fs://meeting/ring4.png',
-        mark: 'fs://meeting/record4.png'
+        uid: '1001',
+        imgPath: 'fs://../wgt/A6014137855572/image/wait.png',
+        title: '待处理',
+        subTitle: '子标题，说明文字',
+        remark: '分配司机',
+        icon: 'fs://../wgt/A6014137855572/image/addDriver.png'
     }],
     rightBtns: [{
-        bgColor: '#CD3700',
+        bgColor: '#FF0000',
         activeBgColor: '',
-        width: 40,
-        title: '删除',
-        titleSize: 12,
-        titleColor: '#fff',
-        icon: '',
-        iconWidth: 20
-    },{
-        bgColor: '#CD950C',
-        activeBgColor: '',
-        width: 40,
-        title: '禁言',
-        titleSize: 12,
-        titleColor: '#fff',
-        icon: '',
-        iconWidth: 20
-    },{
-        bgColor: '#C7C7C7',
-        activeBgColor: '',
-        width: 40,
-        title: '取消',
+        width: 70,
+        title: '取消订单',
         titleSize: 12,
         titleColor: '#fff',
         icon: '',
         iconWidth: 20
     }],
     styles: {
-        border: {
-           color: '#000',
-           width: 0.5
-        },
+        borderColor: '#CDCDCD',
         item: {
-            bgColor: '#F5F5F5',
-            activeBgColor: '#ffffff',
-            height: 50.0,
-            headSize: 30,
-            nameSize: 14,
-            nameColor: '#000',
-            titleSize: 12.0,
-            titleColor: '#ff0000',
-            statusSize: 20.0,
-            markSize: 20,
+            bgColor: '#FFF',
+            activeBgColor: '#F5F5F5',
+            height: 60.0,
+            imgWidth: 40,
+            imgHeight: 40,
+            imgCorner: 4,
+            placeholderImg: '',
+            titleSize: 14.0,
+            titleColor: '#000',
+            subTitleSize: 10.0,
+            subTitleColor: '#000',
+            remarkColor: '#0000FF',
+            remarkSize: 14,
+            remarkIconWidth: 30
         }
     },
     fixedOn: api.frameName
 }, function(ret, err) {
     if (ret) {
-        alert(JSON.stringify(ret));
+        console.log(JSON.stringify(ret));
+        dialogBox = api.require('dialogBox');
+
+        if(ret.eventType=="clickContent"){
+
+
+          dialogBox.receipt({
+              rect:{
+                   w:300,
+                   h:360
+              },
+              items:[
+                  {
+                      key   : '起步价',
+                      value : '15.00'
+                  },
+                  {
+                      key   : '15公里',
+                      value : '50.10'
+                  },
+                  {
+                      key   : '9.98分钟',
+                      value : '19'
+                  },
+                  {
+                      key   : '小计',
+                      value : '69'
+                  },
+                  {
+                      key   : '优惠',
+                      value : '10'
+                  },
+                  {
+                      key   : '已消费',
+                      value : '69.0'
+                  }
+              ],
+              texts:{
+                   title:'我的打车收据',
+                   cancel:'取消'
+              },
+              styles:{
+                   bg:'#FFF',
+                   title:{
+                       textColor:'#000',
+                       textSize:18,
+                       marginT:10
+                   },
+                   topBorder:{
+                       borderColor:'#000',
+                       borderWidth: 2,
+                       marginT: 10
+                   },
+                   listHeight: 260,
+                   item:{
+                       textColor: '#000',
+                       textSize: 14,
+                       marginL: 10,
+                       marginT: 5,
+                       marginB: 5,
+                       bgColor: '#FFF'
+                   },
+                   bottomBorder:{
+                       borderColor:'#000',
+                       borderWidth: 2,
+                   },
+                   cancel:{
+                      textSize: 18,
+                      textColor:'#f00',
+                      marginT: 10,
+                      highlight: '#696969'
+                   }
+              }
+          }, function(ret, err){
+              if( ret ){
+                  console.log(JSON.stringify(ret));
+                  dialogBox.close ({
+                      dialogName: 'receipt'
+                  });
+              }else{
+                  alert(JSON.stringify(err));
+              }
+          });
+        }
     } else {
-        alert(JSON.stringify(err));
+        console.log(JSON.stringify(err));
     }
 });
 }

@@ -1,24 +1,399 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
     <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
-    <title>线路信息</title>
-    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+    <title>我</title>
+    <link rel="stylesheet" type="text/css" href="../css/aui.css"/>
+    <style>
+    html,body{
+      background-color:  rgb(235, 235, 235);
+    }
+
+    .option {
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        height: 61px;
+        border-bottom: 1px solid #ddd;
+        background-color: white;
+    }
+
+    .option .icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 60px;
+        background-repeat: no-repeat;
+        background-position: 12px center;
+        background-size: auto 20px;
+    }
+
+
+    .option .icon-manager {
+        background-image: url(../image/manager.png);
+    }
+
+    .option .icon-linePrice {
+        background-image: url(../image/linePrice.png);
+    }
+
+
+    .option .icon-lineName{
+      background-image: url(../image/lineName.png);
+    }
+    .option .icon-lineInfo {
+        background-image: url(../image/lineInfo.png);
+    }
+/*问题与客服*/
+    .option .icon-qusAndAns {
+        background-image: url(../image/qusAndAns.png);
+    }
+
+    .option .icon-aboutUs {
+        background-image: url(../image/aboutUs.png);
+    }
+
+    .option .icon-setting{
+        background-image: url(../image/setting.png);
+    }
+
+    .option .title {
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        height: 60px;
+        padding-left: 40px;
+        font-size: 14px;
+        color: #444;
+        text-align: left;
+        line-height: 60px;
+    }
+
+    .option .arrow-panel {
+        position: absolute;
+        top: 0;
+        right: 12px;
+        width: auto;
+        height: 60px;
+        background-image: url(../image/arrow_right.png);
+        background-repeat: no-repeat;
+        background-size: 16px 24px;
+        background-position: right center;
+    }
+
+    .option .arrow-panel .text {
+        box-sizing: border-box;
+        padding-right: 20px;
+        width: auto;
+        height: 60px;
+        line-height: 60px;
+        font-size: 13px;
+        color: #888;
+        text-align: left;
+    }
+/*不透明程度*/
+    .highlight {
+        opacity: 0.7;
+    }
+    .text1 {
+        box-sizing: border-box;
+        padding-right: 0;
+        width: auto;
+        height: 60px;
+        line-height: 60px;
+        font-size: 13px;
+        color: #888;
+        text-align: right;
+    }
+
+    .section{
+      margin-bottom: 10px;
+    }
+
+    </style>
 </head>
 
 <body>
-  <div>hello</div>
+    <section class="section">
+      <div class="option">
+          <div class="icon icon-manager"></div>
+          <div class="title">管理员：
+            <span id="manager"></span>
+          </div>
+      </div>
+
+      <div class="option">
+          <div class="icon icon-lineName"></div>
+          <div class="title">线路名：
+            <span id="lineName"></span>
+          </div>
+      </div>
+
+      <div class="option" tapmode onclick="fnSetPrice();">
+          <div class="icon icon-linePrice"></div>
+          <div class="title">线路定价：
+            <span>¥</span>
+            <span id="linePrice">100</span>
+          </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="option" tapmode onclick="fnOpenLineInfoWin();">
+          <div class="icon icon-lineInfo"></div>
+          <div class="title">线路详情</div>
+          <div class="arrow-panel">
+              <div class="text">查看详情</div>
+          </div>
+      </div>
+
+      <div class="option" tapmode onclick="fnOpenSettingWin();">
+          <div class="icon icon-setting"></div>
+          <div class="title">应用设置</div>
+          <div class="arrow-panel">
+              <div class="text">修改设置</div>
+          </div>
+      </div>
+
+    </section>
+
+    <section class="section">
+
+        <div class="option" tapmode onclick="fnOpenqusAndAnsWin();">
+            <div class="icon icon-qusAndAns"></div>
+            <div class="title">我的客服</div>
+            <div class="arrow-panel">
+                <div class="text">问题与帮助</div>
+            </div>
+        </div>
+        <div class="option" tapmode onclick="fnOpenaboutUsWin();">
+            <div class="icon icon-aboutUs"></div>
+            <div class="title">关于我们</div>
+            <div class="arrow-panel">
+                <div class="text">了解更多信息</div>
+            </div>
+        </div>
+    </section>
+
+    <script type="text/javascript" src="../script/api.js"></script>
+    <script type="text/javascript" src="../script/common.js"></script>
+    <script type="text/javascript">
+    /*初始化得到用户信息*/
+    apiready = function() {
+        fnInit();
+    };
+
+    var userInfo;
+    var dialogBox;
+
+    function fnInit(){
+       userInfo = $api.getStorage('userInfo');
+       $api.byId('manager').innerHTML=userInfo.name;
+       $api.byId('lineName').innerHTML=userInfo.lineName;
+    }
+
+
+    //ajax 未知错误?
+    function fnSetPrice(){
+      dialogBox=api.require('dialogBox');
+      dialogBox.amount({
+          texts: {
+              title: '修改线路价格',
+              default: '100',
+              leftBtnTitle: '取消',
+              rightBtnTitle: '确定'
+          },
+          styles: {
+              bg: '#fff',
+              corner: 0.5,
+              w: 300,
+              h: 180,
+              title: {
+                  marginT: 20,
+                  size:  14,
+                  color: '#000'
+              },
+              input: {
+                  w: 150,
+                  h: 44,
+                  marginT: 15,
+                  size: 14,
+                  color: '#000'
+              },
+              dividingLine: {
+                  marginT: 25,
+                  width: 0.5,
+                  color: '#696969'
+              },
+              left: {
+                  marginL: 10,
+                  w: 55,
+                  h: 40,
+                  bg: '#fff',
+                  color: '#00F',
+                  size: 14
+              },
+              right: {
+                  marginR: 10,
+                  w: 55,
+                  h: 40,
+                  bg: '#fff',
+                  color: '#00F',
+                  size: 14
+              }
+          }
+      }, function(ret) {
+
+          console.log(JSON.stringify(ret));
+
+          if (ret.eventType == 'right') {
+
+             api.ajax({
+                 url: 'http//'+url+':'+port+'/mobileManager/setPrice',
+                 method: 'post',
+                 headers: {
+                       'Content-Type': 'application/json;charset=utf-8'
+                   },
+                 data: {
+                   body:{
+                     "lineId":userInfo.lineId,
+                     "token":userInfo.token,
+                     "dnum":null,
+                     "orderId":null,
+                     "status":null,
+                     "price":ret.amount
+                   }
+                 }
+             },function(ret, err){
+                 if (ret) {
+                     console.log( JSON.stringify( ret ) );
+
+                     if(ret.code==0){
+                        $api.byId("linePrice").innerHTML=ret.amount;
+                     }else if(ret.code==13){//token过期
+                       api.alert({
+                           title: '提醒',
+                           msg: '登陆状态过期，请重新登陆',
+                       }, function(ret, err){
+                           if( ret ){
+                                console.log( JSON.stringify( ret ) );
+                                $api.rmStorage('userInfo');
+                                api.closeToWin({
+                                    name: 'root'
+                                });
+                           }else{
+                                console.log( JSON.stringify( err ) );
+                           }
+                       });
+                     }else{
+                       api.alert({
+                           title: '提醒',
+                           msg: ret.msg,
+                       });
+
+                     }
+                   //ajax失败
+                 } else {
+                     console.log( JSON.stringify( err ) );
+                 }
+             });
+          }
+          dialogBox.close({
+            dialogName: 'amount'
+          });
+      });
+
+    }
+
+    // 打开line信息Window
+    function fnOpenLineInfoWin() {
+        api.ajax({
+            url: 'http://'+url+':'+port+'/mobileManager/lineInfo',
+            method: 'post',
+            headers: {
+                  'Content-Type': 'application/json;charset=utf-8'
+              },
+            data: {
+              body:{
+                "lineId":userInfo.lineId,
+                "token":userInfo.token,
+                "dnum":null,
+                "orderId":null,
+                "status":null,
+                "price":null
+              }
+            }
+        },function(ret, err){
+            if (ret) {
+                console.log( JSON.stringify( ret ) );
+                if(ret.code==0){
+
+                    api.openWin({
+                        name: 'lineInfo',
+                        url: './lineInfo.html',
+                        pageParam: {
+                            data:ret.data
+                        }
+                    });
+
+                }else if(ret.code==13){//token过期
+                  api.alert({
+                      title: '提醒',
+                      msg: '登陆状态过期，请重新登陆',
+                  }, function(ret, err){
+                      if( ret ){
+                           console.log( JSON.stringify( ret ) );
+                           $api.rmStorage('userInfo');
+                           api.closeToWin({
+                               name: 'root'
+                           });
+                      }else{
+                           console.log( JSON.stringify( err ) );
+                      }
+                  });
+                }else{
+                  api.alert({
+                      title: '提醒',
+                      msg: ret.msg,
+                  });
+
+                }
+
+            } else {
+                console.log( JSON.stringify( err ) );
+            }
+        });
+
+
+
+
+
+    }
+    function fnOpenSettingWin(){
+      api.openWin({
+        name:'setting',
+        url:'./setting.html',
+      });
+    }
+
+    // 打开客服Window
+    function fnOpenqusAndAnsWin() {
+        api.openWin({
+            name: 'qusAndAns',
+            url: './qusAndAns.html'
+        });
+    }
+
+    // 打开关于Window
+    function fnOpenaboutUsWin() {
+        api.openWin({
+            name: 'aboutUs',
+            url: './aboutUs.html'
+        });
+    }
+    </script>
 </body>
-<script type="text/javascript" src="../script/api.js"></script>
-<script type="text/javascript" src="../script/common.js"></script>
-<script type="text/javascript">
-
-apiready = function() {
-};
-
-</script>
-
 </html>

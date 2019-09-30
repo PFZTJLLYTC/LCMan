@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>我</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+    <style type="text/css">
+        * {
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .row{
+          height: 35px;
+          margin-top: 30px;
+          margin-bottom: 10px;
+          margin-left: 20px;
+          margin-right: 20px;
+          border-bottom: 1px solid #E0E0E0;
+        }
+
+        .tag{
+          display: inline-block;
+          width: 85px;
+          font-size: 16px;
+          text-align: left;
+        }
+
+
+         .input{
+          width: 50%;
+          height: 20px;
+          line-height: 20px;
+          border: none;
+          outline: none;
+          font-size: 16px;
+          background-color: white;
+        }
+
+
+    </style>
+</head>
+<body>
+
+      <div class="row">
+          <span class="tag">线路编号</span>
+          <input id="lineId" type="text" class="input" readonly>
+      </div>
+      <div class="row">
+          <span class="tag">线路名称</span>
+          <input id="lineName" type="text" class="input" readonly>
+      </div>
+
+      <div class="row">
+          <span class="tag">线路定价</span>
+          <input id="linePrice" type="text" class="input" readonly>
+      </div>
+
+      <div class="row">
+          <span class="tag">管理人数</span>
+          <input id="managerNum" type="text" class="input" readonly>
+      </div>
+      <div class="row">
+          <span class="tag">司机人数</span>
+          <input id="driverNum" type="text" class="input" readonly>
+      </div>
+      <div class="row">
+          <span class="tag">今日订单</span>
+          <input id="todayOrderNum" type="text" class="input" readonly>
+      </div>
+
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/common.js"></script>
+  <script type="text/javascript">
+  /*初始化得到用户信息*/
+  apiready = function() {
+      fnShowInfo();
+  };
+
+
+  var lineInfo;
+  var lineId;
+  var lineName;
+  var linePrice;
+  var managerNum;
+  var driverNum;
+  var todayOrderNum;
+
+
+  function fnShowInfo(){
+
+    lineInfo=api.pageParam.data;
+
+    lineId=$api.byId('lineId');
+    lineName=$api.byId('lineName');
+    linePrice=$api.byId('linePrice');
+    managerNum=$api.byId('managerNum');
+    driverNum=$api.byId('driverNum');
+    todayOrderNum=$api.byId('todayOrderNum');
+
+    $api.val(lineId,lineInfo.lineId);
+    $api.val(lineName,lineInfo.lineName);
+    $api.val(linePrice,lineInfo.linePrice);
+    $api.val(managerNum,lineInfo.managerNum);
+    $api.val(driverNum,lineInfo.driverNum);
+    $api.val(todayOrderNum,lineInfo.todayOrderNum);
+
+  }
+
+  </script>
+</body>
+</html>
