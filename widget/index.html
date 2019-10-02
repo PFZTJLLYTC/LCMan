@@ -85,7 +85,54 @@
 <script type="text/javascript">
     apiready = function () {
       $api.fixStatusBar( $api.byId('header') );
+      fnInitPush();
       funIniGroup();
+
+    }
+
+    function fnInitPush(){
+      var userInfo=$api.getStorage('userInfo');
+      var push =api.require('push');
+
+      push.bind({
+        userName:userInfo.telNum,
+        userId:userInfo.telNum,
+      },function(ret,err){
+        if(ret){
+          console.log(JSON.stringify(ret));
+        }else{
+          console.log(JSON.stringify(err));
+        }
+      });
+
+      push.joinGroup({
+          groupName: userInfo.lineId,
+      }, function(ret, err){
+           if( ret ){
+              console.log( JSON.stringify(ret) );
+           }else{
+              console.log( JSON.stringify(err) );
+           }
+      });
+
+
+      push.setListener(function( ret, err ){
+           if( ret ){
+
+             console.log('收到消息:'+ret.data);
+
+             api.notification();
+             api.alert({
+                 title: '消息提醒',
+                 msg: ret.data,
+             });
+
+           }else{
+              console.log( JSON.stringify( err) );
+           }
+      });
+
+
     }
 
     function funIniGroup(){

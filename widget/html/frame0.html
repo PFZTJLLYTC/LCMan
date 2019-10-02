@@ -19,6 +19,9 @@
 
 apiready = function() {
 
+    UIListView=api.require('UIListView');
+    dialogBox=api.require('dialogBox');
+
     fnInitUIListView();
     fnPullRefresh();
 
@@ -26,9 +29,10 @@ apiready = function() {
 
 var userInfo=$api.getStorage('userInfo');
 var UIListView;
-var dialogBox;
+var dialogBox
 var orderListData=[];//UIListView 使用数据，显示订单item基本数据
 var orderInfoData=[];//dialogBox receipt 使用数据，点击显示订单详情数据
+var optionDrivers=[];//dialogBox scene 使用数据
 
 
 function fnPullRefresh(){
@@ -55,14 +59,14 @@ function fnSetOrderData(value,index){
 
 
     if(value.orderStatus==0){
-      orderListData.push({
+      orderListData[index]={
         'uid':value.orderId,
         'imgPath':'widget://image/wait.png',
         'title':value.lineName,
         'subTitle':value.userCount+"人  预约时间："+value.time,
         'remark': '分配司机',
         'icon': 'widget://image/addDriver.png'
-      });
+      };
 
       orderInfoData[index]=[
         {
@@ -86,14 +90,14 @@ function fnSetOrderData(value,index){
         }
       ];
     }else{
-      orderListData.push({
+      orderListData[index]={
         'uid':value.orderId,
         'imgPath':'widget://image/processin.png',
         'title':value.lineName,
         'subTitle':value.userCount+"人  预约时间："+value.time,
         'remark': '',
         'icon': ''
-      });
+      };
 
       orderInfoData[index]=[
         {
@@ -183,8 +187,6 @@ function fnGetOrders(){
 
 function fnInitUIListView(){
 
-  UIListView= api.require('UIListView');
-
   fnGetOrders();
 
   UIListView.open({
@@ -228,100 +230,311 @@ function fnInitUIListView(){
 }, function(ret, err) {
     if (ret) {
         console.log(JSON.stringify(ret));
-        dialogBox = api.require('dialogBox');
 
         if(ret.eventType=="clickContent"){
 
-          dialogBox.receipt({
-              rect:{
-                   w:300,
-                   h:360
-              },
-              items:orderInfoData[ret.index],
-              texts:{
-                   title:'订单详情',
-                   cancel:'取消'
-              },
-              styles:{
-                   bg:'#FFF',
-                   title:{
-                       textColor:'#000',
-                       textSize:18,
-                       marginT:10
-                   },
-                   topBorder:{
-                       borderColor:'#000',
-                       borderWidth: 2,
-                       marginT: 10
-                   },
-                   listHeight: 260,
-                   item:{
-                       textColor: '#000',
-                       textSize: 14,
-                       marginL: 10,
-                       marginT: 5,
-                       marginB: 5,
-                       bgColor: '#FFF'
-                   },
-                   bottomBorder:{
-                       borderColor:'#000',
-                       borderWidth: 2,
-                   },
-                   cancel:{
-                      textSize: 18,
-                      textColor:'#f00',
-                      marginT: 10,
-                      highlight: '#696969'
-                   }
-              }
-          }, function(ret, err){
-              if( ret ){
-                  console.log(JSON.stringify(ret));
-                  dialogBox.close ({
-                      dialogName: 'receipt'
-                  });
-              }else{
-                  alert(JSON.stringify(err));
-              }
-          });
+          fnClickContentHandler(ret.index);
+          //取消订单
         }else if(ret.eventType=="clickRightBtn"){
 
-          var delIndex=ret.index;
+          fnClickRightBtnHandler(ret.index);
 
-          api.confirm({
-              title: '提醒',
-              msg: '确定取消该订单吗?',
-              buttons: ['确定', '取消']//bottonIndex 1 , 2 (从1开始算)
-          }, function(ret, err){
-              if( ret ){
-                   console.log( JSON.stringify( ret ) );
-                   //确定后发送取消请求
-                   if(ret.buttonIndex==1){
-                      fnCancelOrder(orderInfoData[delIndex][0].value);
-                   }
+         //分配司机
+        }else if(ret.eventType=="clickRemark"){
 
-                   UIListView.deleteItem({
-                       index: delIndex
-                   }, function(ret, err){
-                       if( ret ){
-                            console.log( JSON.stringify( ret ) );
-                       }else{
-                            console.log( JSON.stringify( err ) );
-                       }
-                   });
-
-
-              }else{
-                   console.log( JSON.stringify( err ) );
-              }
-          });
-
+          fnClickRemarkHandler(ret.index);
 
         }
     } else {
         console.log(JSON.stringify(err));
     }
 });
+
+}
+
+function fnClickContentHandler(index){
+
+  dialogBox.receipt({
+      rect:{
+           w:300,
+           h:360
+      },
+      items:orderInfoData[index],
+      texts:{
+           title:'订单详情',
+           cancel:'取消'
+      },
+      styles:{
+           bg:'#FFF',
+           title:{
+               textColor:'#000',
+               textSize:18,
+               marginT:10
+           },
+           topBorder:{
+               borderColor:'#000',
+               borderWidth: 2,
+               marginT: 10
+           },
+           listHeight: 260,
+           item:{
+               textColor: '#000',
+               textSize: 14,
+               marginL: 10,
+               marginT: 5,
+               marginB: 5,
+               bgColor: '#FFF'
+           },
+           bottomBorder:{
+               borderColor:'#000',
+               borderWidth: 2,
+           },
+           cancel:{
+              textSize: 18,
+              textColor:'#f00',
+              marginT: 10,
+              highlight: '#696969'
+           }
+      }
+  }, function(ret, err){
+      if( ret ){
+          console.log(JSON.stringify(ret));
+          dialogBox.close ({
+              dialogName: 'receipt'
+          });
+      }else{
+          alert(JSON.stringify(err));
+      }
+  });
+}
+
+function fnClickRightBtnHandler(index){
+  api.confirm({
+      title: '提醒',
+      msg: '确定取消该订单吗?',
+      buttons: ['确定', '取消']//bottonIndex 1 , 2 (从1开始算)
+  }, function(ret, err){
+      if( ret ){
+           console.log( JSON.stringify( ret ) );
+           //确定后发送取消请求
+           if(ret.buttonIndex==1){
+              fnCancelOrder(orderInfoData[index][0].value);
+           }
+
+           UIListView.deleteItem({
+               index: index
+           },function(ret,err){
+             
+           });
+
+
+      }else{
+           console.log( JSON.stringify( err ) );
+      }
+  });
+}
+
+function fnClickRemarkHandler(index){
+
+  api.ajax({
+      url: 'http://'+url+':'+port+'/mobileManager/driver/findByStatus',
+      method: 'post',
+      headers:{
+        'Content-Type':'application/json;charset=utf-8'
+      },
+      data: {
+        body:{
+            "lineId":userInfo.lineId,
+            "token":userInfo.token,
+            "dnum":null,
+            "orderId":null,
+            "status":(orderListData[index].title==userInfo.lineName)?2:3,
+            "price":null
+        }
+      }
+  },function(ret, err){
+      if (ret) {
+          console.log( JSON.stringify( ret ) );
+          if(ret.code==0){
+
+            optionDrivers=[];
+
+            ret.data.forEach(function(value,index){
+                optionDrivers[index]={
+                  'icon':'widget://image/available'+((value.status==2)?'1.png':'2.png'),
+                  'text':value.name+' '+value.dnum+
+                        '\n可用座位：'+value.availableSeats+
+                        '\n月完成订单：'+value.workTimes
+                }
+            });
+
+            var driverData=ret.data;
+
+            dialogBox.scene ({
+                rect: {
+                    w: 300,
+                    h: 110+((ret.data.length<=4)?75*ret.data.length:4*75)
+                },
+                texts: {
+                    title: '分配司机',
+                    content:'- 订单编号：'+orderInfoData[index][0].value+
+                            '\n- 预约时间：'+orderInfoData[index][3].value+
+                            '\n- 乘客人数：'+orderInfoData[index][1].value+((ret.data.length<=4)?'':'  (滑动显示更多)'),
+                    okBtnTitle: '取消'
+                },
+                styles: {
+                    bg:'#fff',
+                    corner:2,//暂只支持ios
+                    title:{
+                        bg: '#fff',
+                        h: 20,
+                        size: 14,
+                        color: '#000'
+                    },
+                    content:{
+                        color: '#111',
+                        size: 12
+                    },
+                    cell: {
+                        bg: '#fff',
+                        h: 75,
+                        text: {
+                            color: '#636363',
+                            size: 13
+                        },
+                        icon: {
+                            marginL: 5,
+                            marginT: 6,
+                            w: 30,
+                            h: 30,
+                            corner: 2
+                        }
+                    },
+                    ok: {//设置为取消
+                        bg: '#fff',
+                        titleColor: '#00f'
+                    }
+                },
+                optionDatas:optionDrivers
+            }, function(ret, err){
+
+                dialogBox.close ({
+                  dialogName: 'scene'
+                });
+
+                if( ret ){
+                    console.log(JSON.stringify(ret));
+                    if(ret.eventType=='cell'){
+                      fnConfirmOrder(ret.index,orderInfoData[index][0].value,optionDrivers[ret.index].text.split('\n')[0].split(' ')[1]);
+                    }
+
+                }else{
+                    console.log(JSON.stringify(err));
+                }
+            });
+
+          }else if(ret.code==13){//token过期
+            api.alert({
+                title: '提醒',
+                msg: '登陆状态过期，请重新登陆',
+            }, function(ret, err){
+                  $api.rmStorage('userInfo');
+                  api.closeToWin({
+                         name: 'root'
+                     });
+            });
+          }else{
+            api.alert({
+                title: '提醒',
+                msg: ret.msg,
+            });
+
+          }
+
+
+      } else {
+          console.log( JSON.stringify( err ) );
+      }
+  });
+
+}
+
+function fnConfirmOrder(index,orderId,dnum){
+
+  api.ajax({
+      url: 'http://'+url+':'+port+'/mobileManager/order/confirmOne',
+      method: 'post',
+      headers:{
+        'Content-Type':'application/json;charset=utf-8'
+      },
+      data: {
+        body:{
+          "lineId":userInfo.lineId,
+          "token":userInfo.token,
+          "dnum":dnum,
+          "orderId":orderId,
+          "status":null,
+          "price":null
+        }
+      }
+  },function(ret, err){
+      if (ret) {
+          console.log( JSON.stringify( ret ) );
+
+          orderListData[index].imgPath='widget://image/processin.png';
+          orderListData[index].remark='';
+          orderListData[index].icon='';
+
+          var oldInfo=orderInfoData[index];
+
+          orderInfoData[index]=[
+            {
+              'key':'订单编号',
+              'value':oldInfo[0].value
+            },{
+              'key':'预约司机',
+              'value':optionDrivers[index].text.split(' ')[0]//获取司机名字
+            },{
+              'key':'乘客人数',
+              'value':oldInfo[1].value
+            },{
+              'key':'联系电话',
+              'value':oldInfo[2].value
+            },{
+              'key':'预约时间',
+              'value':oldInfo[3].value
+            },{
+              'key':'详细地址',
+              'value':oldInfo[4].value
+            },{
+              'key':'备注',
+              'value':oldInfo[5].value
+            }
+          ];
+          //重新加载列表数据
+          UIListView.updateItem({
+            index:index,
+            data:orderListData[index]
+          },function(ret,err){
+            if(ret){
+              console.log(JSON.stringify(ret));
+            }else{
+              console.log(JSON.stringify(err));
+            }
+
+          });
+
+          api.toast({
+              msg: '分配司机成功',
+              duration: 2000,
+              location: 'middle'
+          });
+
+      } else {
+          console.log( JSON.stringify( err ) );
+      }
+  });
+
 
 }
 
@@ -347,10 +560,12 @@ function fnCancelOrder(orderId){
           console.log( JSON.stringify( ret ) );
           if(ret.code==0){
 
-            api.alert({
-                title: '通知',
+            api.toast({
                 msg: '取消订单成功',
+                duration: 2000,
+                location: 'middle'
             });
+
 
 
           }else if(ret.code==13){//token过期
@@ -370,7 +585,6 @@ function fnCancelOrder(orderId){
             });
 
           }
-
 
       } else {
           console.log( JSON.stringify( err ) );
