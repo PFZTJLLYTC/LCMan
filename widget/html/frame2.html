@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
     <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
-    <title>我</title>
+    <title>线路信息</title>
     <link rel="stylesheet" type="text/css" href="../css/aui.css"/>
     <style>
     html,body{
@@ -136,7 +136,7 @@
           <div class="icon icon-linePrice"></div>
           <div class="title">线路定价：
             <span>¥</span>
-            <span id="linePrice">100</span>
+            <span id="linePrice"></span>
           </div>
       </div>
     </section>
@@ -193,6 +193,7 @@
        userInfo = $api.getStorage('userInfo');
        $api.byId('manager').innerHTML=userInfo.name;
        $api.byId('lineName').innerHTML=userInfo.lineName;
+       $api.byId('linePrice').innerHTML=userInfo.linePrice;
     }
 
 
@@ -202,7 +203,7 @@
       dialogBox.amount({
           texts: {
               title: '修改线路价格',
-              default: '100',
+              default: userInfo.linePrice,
               leftBtnTitle: '取消',
               rightBtnTitle: '确定'
           },
@@ -251,55 +252,66 @@
 
           if (ret.eventType == 'right') {
 
+             $api.byId("linePrice").innerHTML=ret.amount;
+
              api.ajax({
-                 url: 'http//'+url+':'+port+'/mobileManager/setPrice',
+                 url: 'http://'+url+':'+port+'/mobileManager/setPrice',
                  method: 'post',
-                 headers: {
-                       'Content-Type': 'application/json;charset=utf-8'
-                   },
+                 headers:{
+                   'Content-Type':'application/json;charset=utf-8'
+                 },
                  data: {
                    body:{
-                     "lineId":userInfo.lineId,
-                     "token":userInfo.token,
-                     "dnum":null,
-                     "orderId":null,
-                     "status":null,
-                     "price":ret.amount
+                      "lineId":userInfo.lineId,
+                      "token":userInfo.token,
+                      "dnum":null,
+                      "orderId":null,
+                      "status":null,
+                      "price":ret.amount
                    }
                  }
              },function(ret, err){
                  if (ret) {
                      console.log( JSON.stringify( ret ) );
-
                      if(ret.code==0){
-                        $api.byId("linePrice").innerHTML=ret.amount;
+
+                      userInfo.linePrice=ret.data;//更新缓存
+
+                      api.toast({
+                          msg: '线路定价修改成功',
+                          duration: 2000,
+                          location: 'middle'
+                      });
+
+
                      }else if(ret.code==13){//token过期
+
+                       $api.byId("linePrice").innerHTML=userInfo.linePrice;
+
                        api.alert({
                            title: '提醒',
                            msg: '登陆状态过期，请重新登陆',
                        }, function(ret, err){
-                           if( ret ){
-                                console.log( JSON.stringify( ret ) );
-                                $api.rmStorage('userInfo');
-                                api.closeToWin({
+                             $api.rmStorage('userInfo');
+                             api.closeToWin({
                                     name: 'root'
                                 });
-                           }else{
-                                console.log( JSON.stringify( err ) );
-                           }
                        });
                      }else{
+
+                       $api.byId("linePrice").innerHTML=userInfo.linePrice;
+
                        api.alert({
                            title: '提醒',
                            msg: ret.msg,
                        });
 
                      }
-                   //ajax失败
                  } else {
                      console.log( JSON.stringify( err ) );
                  }
              });
+
           }
           dialogBox.close({
             dialogName: 'amount'
@@ -330,7 +342,6 @@
             if (ret) {
                 console.log( JSON.stringify( ret ) );
                 if(ret.code==0){
-
                     api.openWin({
                         name: 'lineInfo',
                         url: './lineInfo.html',
@@ -338,21 +349,15 @@
                             data:ret.data
                         }
                     });
-
                 }else if(ret.code==13){//token过期
                   api.alert({
                       title: '提醒',
                       msg: '登陆状态过期，请重新登陆',
                   }, function(ret, err){
-                      if( ret ){
-                           console.log( JSON.stringify( ret ) );
-                           $api.rmStorage('userInfo');
-                           api.closeToWin({
+                        $api.rmStorage('userInfo');
+                        api.closeToWin({
                                name: 'root'
                            });
-                      }else{
-                           console.log( JSON.stringify( err ) );
-                      }
                   });
                 }else{
                   api.alert({

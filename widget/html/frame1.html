@@ -18,9 +18,239 @@
 
 apiready = function() {
 
+    fnInitUIListView();
+    fnPullRefresh();
+
 };
 
+var userInfo=$api.getStorage('userInfo');
+var UIListView;
+var dialogBox;
+var driverListData=[];//UIListView 使用数据，显示订单item基本数据
+var driverInfoData=[];//dialogBox receipt 使用数据，点击显示订单详情数据
+var driverStatus=["休息中","在路上","待出行","待返程"];
+var driverImgPath=['widget://image/wait.png','widget://image/processin.png','widget://image/available1.png','widget://image/available2.png'];
 
+
+function fnPullRefresh(){
+  UIListView.setRefreshHeader({
+      loadingImg: 'widget://image/UIListView_arrow.png',
+      bgColor: '#F5F5F5',
+      textColor: '#8E8E8E',
+      textDown: '下拉可以刷新...',
+      textUp: '松开开始刷新...',
+      showTime: true
+  }, function(ret, err) {
+      if (ret) {
+
+          fnGetDrivers();
+
+      } else {
+          alert(JSON.stringify(err));
+      }
+  });
+}
+
+//设置订单列表和订单详情数据信息
+function fnSetDriverData(value,index){
+
+
+    driverListData.push({
+        'uid':value.dnum,
+        'imgPath':driverImgPath[value.status],
+        'title':value.name,
+        'subTitle':driverStatus[value.status]+'   可用座位：'+value.availableSeats,
+        'remark': '联系司机',
+        'icon': 'widget://image/tel.png'
+      });
+
+    driverInfoData[index]=[
+      {
+        'key':'司机姓名',
+        'value':value.name
+      },{
+        'key':'联系电话',
+        'value':value.dnum
+      },{
+        'key':'车牌号码',
+        'value':value.carNum
+      },{
+        'key':'接单数量',
+        'value':value.workTimes
+      },{
+        'key':'当前状态',
+        'value':driverStatus[value.status]
+      },{
+        'key':'可用座位',
+        'value':value.availableSeats
+      }
+    ];
+
+}
+
+function fnGetDrivers(){
+  api.ajax({
+      url: 'http://'+url+':'+port+'/mobileManager/driver/allDrivers',
+      method: 'post',
+      headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+      data: {
+          body:{
+            "lineId":userInfo.lineId,
+            "token":userInfo.token,
+            "dnum":null,
+            "orderId":null,
+            "status":null,
+            "price":null
+          }
+      }
+  },function(ret, err){
+      if (ret) {
+          console.log( JSON.stringify( ret ) );
+          if(ret.code==0){
+
+            driverListData=[];//清空数组
+            driverInfoData=[];
+
+            ret.data.forEach(fnSetDriverData);
+            //加载数据，收起下拉刷新
+            UIListView.reloadData({
+              data:driverListData
+            },function(ret){
+              console.log(JSON.stringify(ret));
+            });
+
+          }else if(ret.code==13){//token过期
+            api.alert({
+                title: '提醒',
+                msg: '登陆状态过期，请重新登陆',
+            }, function(ret, err){
+                  $api.rmStorage('userInfo');
+                  api.closeToWin({
+                         name: 'root'
+                     });
+            });
+          }else{
+            api.alert({
+                title: '提醒',
+                msg: ret.msg,
+            });
+
+          }
+        }else{
+          console.log(JSON.stringify(err));
+        }
+  });
+}
+
+
+
+function fnInitUIListView(){
+
+  UIListView= api.require('UIListView');
+
+  fnGetDrivers();
+
+  UIListView.open({
+    rect: {
+        x: 0,
+        y: 0,
+        w: api.winWidth,
+        h: api.frameHeight
+    },
+    data: driverListData,
+    forbidden:true,//禁用侧滑按钮
+    styles: {
+        borderColor: '#CDCDCD',
+        item: {
+            bgColor: '#FFF',
+            activeBgColor: '#F5F5F5',
+            height: 60.0,
+            imgWidth: 40,
+            imgHeight: 40,
+            imgCorner: 4,
+            placeholderImg: '',
+            titleSize: 14.0,
+            titleColor: '#000',
+            subTitleSize: 10.0,
+            subTitleColor: '#000',
+            remarkColor: '#0000FF',
+            remarkSize: 14,
+            remarkIconWidth: 30
+        }
+    },
+    fixedOn: api.frameName
+}, function(ret, err) {
+    if (ret) {
+        console.log(JSON.stringify(ret));
+        dialogBox = api.require('dialogBox');
+        if(ret.eventType=="clickRemark"){
+          api.call({
+              type: 'tel_prompt',
+              number: driverInfoData[ret.index][1].value
+          });
+        }else if(ret.eventType=="clickContent"){
+
+          dialogBox.receipt({
+              rect:{
+                   w:300,
+                   h:360
+              },
+              items:driverInfoData[ret.index],
+              texts:{
+                   title:'司机信息',
+                   cancel:'取消'
+              },
+              styles:{
+                   bg:'#FFF',
+                   title:{
+                       textColor:'#000',
+                       textSize:18,
+                       marginT:10
+                   },
+                   topBorder:{
+                       borderColor:'#000',
+                       borderWidth: 2,
+                       marginT: 10
+                   },
+                   listHeight: 260,
+                   item:{
+                       textColor: '#000',
+                       textSize: 14,
+                       marginL: 10,
+                       marginT: 5,
+                       marginB: 5,
+                       bgColor: '#FFF'
+                   },
+                   bottomBorder:{
+                       borderColor:'#000',
+                       borderWidth: 2,
+                   },
+                   cancel:{
+                      textSize: 18,
+                      textColor:'#f00',
+                      marginT: 10,
+                      highlight: '#696969'
+                   }
+              }
+          }, function(ret, err){
+              if( ret ){
+                  console.log(JSON.stringify(ret));
+                  dialogBox.close ({
+                      dialogName: 'receipt'
+                  });
+              }else{
+                  console.log(JSON.stringify(err));
+              }
+          });
+        }
+    } else {
+        console.log(JSON.stringify(err));
+    }
+});
+
+}
 
 </script>
 
