@@ -197,126 +197,238 @@
     }
 
 
-    //ajax 未知错误?
     function fnSetPrice(){
       dialogBox=api.require('dialogBox');
-      dialogBox.amount({
+      // dialogBox.amount({
+      //     texts: {
+      //         title: '修改线路价格',
+      //         default: userInfo.linePrice,
+      //         leftBtnTitle: '取消',
+      //         rightBtnTitle: '确定'
+      //     },
+      //     styles: {
+      //         bg: '#fff',
+      //         corner: 0.5,
+      //         w: 300,
+      //         h: 180,
+      //         title: {
+      //             marginT: 20,
+      //             size:  14,
+      //             color: '#000'
+      //         },
+      //         input: {
+      //             w: 150,
+      //             h: 44,
+      //             marginT: 15,
+      //             size: 14,
+      //             color: '#000'
+      //         },
+      //         dividingLine: {
+      //             marginT: 25,
+      //             width: 0.5,
+      //             color: '#696969'
+      //         },
+      //         left: {
+      //             marginL: 10,
+      //             w: 55,
+      //             h: 40,
+      //             bg: '#fff',
+      //             color: '#00F',
+      //             size: 14
+      //         },
+      //         right: {
+      //             marginR: 10,
+      //             w: 55,
+      //             h: 40,
+      //             bg: '#fff',
+      //             color: '#00F',
+      //             size: 14
+      //         }
+      //     }
+      // }, function(ret) {
+      //
+      //     console.log(JSON.stringify(ret));
+      //
+      //     if (ret.eventType == 'right') {
+      //
+      //        $api.byId("linePrice").innerHTML=ret.amount;
+      //
+      //        api.ajax({
+      //            url: 'http://'+url+':'+port+'/mobileManager/setPrice',
+      //            method: 'post',
+      //            headers:{
+      //              'Content-Type':'application/json;charset=utf-8'
+      //            },
+      //            data: {
+      //              body:{
+      //                 "lineId":userInfo.lineId,
+      //                 "token":userInfo.token,
+      //                 "dnum":null,
+      //                 "orderId":null,
+      //                 "status":null,
+      //                 "price":ret.amount
+      //              }
+      //            }
+      //        },function(ret, err){
+      //            if (ret) {
+      //                console.log( JSON.stringify( ret ) );
+      //                if(ret.code==0){
+      //
+      //                 userInfo.linePrice=ret.data;//更新缓存
+      //
+      //                 api.toast({
+      //                     msg: '线路定价修改成功',
+      //                     duration: 2000,
+      //                     location: 'middle'
+      //                 });
+      //
+      //
+      //                }else if(ret.code==13){//token过期
+      //
+      //                  $api.byId("linePrice").innerHTML=userInfo.linePrice;
+      //
+      //                  api.alert({
+      //                      title: '提醒',
+      //                      msg: '登陆状态过期，请重新登陆',
+      //                  }, function(ret, err){
+      //                        $api.rmStorage('userInfo');
+      //                        api.closeToWin({
+      //                               name: 'root'
+      //                           });
+      //                  });
+      //                }else{
+      //
+      //                  $api.byId("linePrice").innerHTML=userInfo.linePrice;
+      //
+      //                  api.alert({
+      //                      title: '提醒',
+      //                      msg: ret.msg,
+      //                  });
+      //
+      //                }
+      //            } else {
+      //                console.log( JSON.stringify( err ) );
+      //            }
+      //        });
+      //
+      //     }
+      //     dialogBox.close({
+      //       dialogName: 'amount'
+      //     });
+      // });
+
+      dialogBox.input({
+          keyboardType: 'default',
           texts: {
-              title: '修改线路价格',
-              default: userInfo.linePrice,
+              title: '线路定价',
+              placeholder: '输入价格（或价格区间）\n 例如：100-120',
+              default:$api.byId("linePrice").innerHTML,
               leftBtnTitle: '取消',
               rightBtnTitle: '确定'
           },
           styles: {
               bg: '#fff',
-              corner: 0.5,
-              w: 300,
-              h: 180,
+              corner: 2,
+              w: 250,
+              h: 150,
               title: {
-                  marginT: 20,
-                  size:  14,
-                  color: '#000'
-              },
-              input: {
-                  w: 150,
-                  h: 44,
-                  marginT: 15,
+                  h: 30,
+                  alignment: 'center',
                   size: 14,
                   color: '#000'
               },
+              input: {
+                  h: 60,
+                  marginUD: 6,
+                  textSize: 14,
+                  textColor: '#000'
+              },
               dividingLine: {
-                  marginT: 25,
                   width: 0.5,
                   color: '#696969'
               },
               left: {
-                  marginL: 10,
-                  w: 55,
-                  h: 40,
-                  bg: '#fff',
-                  color: '#00F',
-                  size: 14
+                  bg: 'rgba(0,0,0,0)',
+                  color: '#007FFF',
+                  size: 12
               },
               right: {
-                  marginR: 10,
-                  w: 55,
-                  h: 40,
-                  bg: '#fff',
-                  color: '#00F',
-                  size: 14
+                  bg: 'rgba(0,0,0,0)',
+                  color: '#007FFF',
+                  size: 12
               }
           }
       }, function(ret) {
 
-          console.log(JSON.stringify(ret));
-
-          if (ret.eventType == 'right') {
-
-             $api.byId("linePrice").innerHTML=ret.amount;
+          if (ret.eventType == 'right'){
+             $api.byId("linePrice").innerHTML=ret.text;
 
              api.ajax({
-                 url: 'http://'+url+':'+port+'/mobileManager/setPrice',
-                 method: 'post',
-                 headers:{
-                   'Content-Type':'application/json;charset=utf-8'
-                 },
-                 data: {
-                   body:{
-                      "lineId":userInfo.lineId,
-                      "token":userInfo.token,
-                      "dnum":null,
-                      "orderId":null,
-                      "status":null,
-                      "price":ret.amount
-                   }
-                 }
-             },function(ret, err){
-                 if (ret) {
-                     console.log( JSON.stringify( ret ) );
-                     if(ret.code==0){
+                        url: 'http://'+url+':'+port+'/mobileManager/setPrice',
+                        method: 'post',
+                        headers:{
+                          'Content-Type':'application/json;charset=utf-8'
+                        },
+                        data: {
+                          body:{
+                             "lineId":userInfo.lineId,
+                             "token":userInfo.token,
+                             "dnum":null,
+                             "orderId":null,
+                             "status":null,
+                             "price":ret.text
+                          }
+                        }
+                    },function(ret, err){
+                        if (ret) {
+                            console.log( JSON.stringify( ret ) );
+                            if(ret.code==0){
 
-                      userInfo.linePrice=ret.data;//更新缓存
+                             userInfo.linePrice=ret.data;//更新缓存
 
-                      api.toast({
-                          msg: '线路定价修改成功',
-                          duration: 2000,
-                          location: 'middle'
-                      });
+                             api.toast({
+                                 msg: '线路定价修改成功',
+                                 duration: 2000,
+                                 location: 'middle'
+                             });
 
 
-                     }else if(ret.code==13){//token过期
+                            }else if(ret.code==13){//token过期
 
-                       $api.byId("linePrice").innerHTML=userInfo.linePrice;
+                              $api.byId("linePrice").innerHTML=userInfo.linePrice;
 
-                       api.alert({
-                           title: '提醒',
-                           msg: '登陆状态过期，请重新登陆',
-                       }, function(ret, err){
-                             $api.rmStorage('userInfo');
-                             api.closeToWin({
-                                    name: 'root'
-                                });
-                       });
-                     }else{
+                              api.alert({
+                                  title: '提醒',
+                                  msg: '登陆状态过期，请重新登陆',
+                              }, function(ret, err){
+                                    $api.rmStorage('userInfo');
+                                    api.closeToWin({
+                                           name: 'root'
+                                       });
+                              });
+                            }else{
 
-                       $api.byId("linePrice").innerHTML=userInfo.linePrice;
+                              $api.byId("linePrice").innerHTML=userInfo.linePrice;
 
-                       api.alert({
-                           title: '提醒',
-                           msg: ret.msg,
-                       });
+                              api.alert({
+                                  title: '提醒',
+                                  msg: ret.msg,
+                              });
 
-                     }
-                 } else {
-                     console.log( JSON.stringify( err ) );
-                 }
-             });
-
+                            }
+                        } else {
+                            console.log( JSON.stringify( err ) );
+                        }
+                    });
           }
+
+          var dialogBox = api.require('dialogBox');
           dialogBox.close({
-            dialogName: 'amount'
+              dialogName: 'input'
           });
+
       });
+
 
     }
 
